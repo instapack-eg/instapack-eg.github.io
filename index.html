@@ -45,7 +45,7 @@ const $=i=>document.getElementById(i),root=$("root"),DATA=JSON.parse($("data").t
 const esc=s=>String(s??"").replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 const intl=s=>"20"+String(s).replace(/\D/g,"").replace(/^0+/,"");
 const wa=t=>`https://wa.me/${intl(DATA.shop.show)}?text=${encodeURIComponent(t)}`;
-let cur=null,edit=false,canEdit=false,A=null;
+let cur=null,edit=false,canEdit=false;
 const byHash=()=>DATA.cats.find(c=>c.id===location.hash.slice(1))||null;
 cur=byHash();
 
@@ -54,30 +54,43 @@ function cards(){const t=($("q")&&$("q").value||"").trim(),S=DATA.shop;
  return L.length?L.map(p=>{const pr=p.p!=null?`${p.p} <small>جنيه${p.u?" / "+esc(p.u):""}</small>`:`<small>السعر عند الطلب</small>`;
  return`<article class="card"><div class="img">${p.img?`<img src="${p.img}" alt="${esc(p.n)}" loading="lazy">`:`<span aria-hidden="true">${esc(cur.e)}</span>`}${p.out?'<span class="badge">غير متاح حاليًا</span>':""}</div><div class="body"><h3>${esc(p.n)}</h3><ul class="specs">${p.d.map(x=>`<li>${esc(x)}</li>`).join("")}</ul><div class="price">${p.out?"":pr}</div><div class="row"><a class="btn wa" target="_blank" rel="noopener" href="${wa("السلام عليكم، عايز أطلب: "+p.n)}">اطلب الآن</a><a class="btn ln" target="_blank" rel="noopener" href="${esc(S.mapUrl)}">الموقع</a></div></div></article>`}).join(""):`<div class="empty">مفيش منتجات مطابقة. اطلب منتجك عبر واتساب.</div>`}
 
-function editCards(){return cur.list.map((p,i)=>`<article class="card"><label class="img up">${p.img?`<img src="${p.img}" alt="">`:`<span>${esc(cur.e)}</span>`}<em>${p.img?"تغيير الصورة":"إضافة صورة"}</em><input type="file" accept="image/*" data-act="img" data-i="${i}"></label><div class="body"><input class="fld" data-k="n" data-i="${i}" value="${esc(p.n)}" placeholder="اسم المنتج"><textarea class="fld" data-k="d" data-i="${i}" rows="3" placeholder="التفاصيل (كل سطر ميزة)">${esc(p.d.join("\n"))}</textarea><div class="row"><input class="fld" data-k="p" data-i="${i}" inputmode="decimal" value="${p.p??""}" placeholder="السعر"><input class="fld" data-k="u" data-i="${i}" value="${esc(p.u||"")}" placeholder="الوحدة"></div><label class="chk"><input type="checkbox" data-k="out" data-i="${i}" ${p.out?"checked":""}> غير متاح حاليًا</label><button class="back dg" data-act="del" data-i="${i}">حذف المنتج</button></div></article>`).join("")+`<button class="cat" data-act="addp">＋ منتج جديد</button>`}
+function editCards(){return cur.list.map((p,i)=>`<article class="card"><label class="img up">${p.img?`<img src="${p.img}" alt="">`:`<span>${esc(cur.e)}</span>`}<em>${p.img?"تغيير الصورة":"إضافة صورة"}</em><input type="file" accept="image/*" hidden data-act="img" data-i="${i}"></label><div class="body"><input class="fld" data-k="n" data-i="${i}" value="${esc(p.n)}" placeholder="اسم المنتج"><textarea class="fld" data-k="d" data-i="${i}" rows="3" placeholder="التفاصيل (كل سطر ميزة)">${esc(p.d.join("\n"))}</textarea><div class="row"><input class="fld" data-k="p" data-i="${i}" inputmode="decimal" value="${p.p??""}" placeholder="السعر"><input class="fld" data-k="u" data-i="${i}" value="${esc(p.u||"")}" placeholder="الوحدة"></div><label class="chk"><input type="checkbox" data-k="out" data-i="${i}" ${p.out?"checked":""}> غير متاح حاليًا</label><button class="back dg" data-act="del" data-i="${i}">حذف المنتج</button></div></article>`).join("")+`<button class="cat" data-act="addp">＋ منتج جديد</button>`}
 
 function panel(){const S=DATA.shop,f=(k,l,ph)=>`<label>${l}<input class="fld" data-s="${k}" value="${esc(S[k])}" placeholder="${ph||""}"></label>`;
  return`<div class="panel"><h3>بيانات المحل</h3>${f("show","رقم الواتساب والاتصال","01xxxxxxxxx")}${f("address","العنوان")}${f("tag","الوصف تحت الاسم")}${f("notice","شريط التنبيه")}${f("mapUrl","رابط الموقع على الخريطة")}<label>اللوجو<input type="file" accept="image/*" data-act="logo"></label></div>`}
 
-function render(){const S=DATA.shop;
+function render(){const S=DATA.shop;if(location.hash==="#admin"&&!canEdit){root.innerHTML=`<section class="wrap"><div class="panel" style="margin-top:24px"><h3>دخول الإدارة</h3><label>مفتاح GitHub<input class="fld" id="tok" type="password" autocomplete="off" placeholder="الصق المفتاح هنا"></label><button class="btn wa" data-act="login">دخول</button><span id="lg"></span></div></section>`;return}
  let h=`<header><div class="wrap"><div class="brand"><div class="logo"><img src="${DATA.logo}" alt="شعار انستا باك"></div><div><h1>INSTA PACK</h1><p class="tag">${esc(S.tag)}</p></div></div><div class="acts"><a class="btn wa" target="_blank" rel="noopener" href="${wa("السلام عليكم، عايز أستفسر عن منتجات INSTA PACK")}">تواصل عبر واتساب</a><a class="btn ln call" href="tel:${esc(S.show)}" target="_blank" rel="noopener">اتصل بنا</a><a class="btn ln" target="_blank" rel="noopener" href="${esc(S.mapUrl)}">موقعنا على الخريطة</a></div></div></header><div class="notice">${esc(S.notice)}</div>`;
  if(!cur){h+=`<section class="wrap"><h2>الأقسام</h2>${edit?panel():""}<div class="cats">`+DATA.cats.map((c,i)=>edit?`<div class="cat ed"><input class="mini" data-c="e" data-i="${i}" value="${esc(c.e)}" aria-label="رمز"><input class="mini" data-c="n" data-i="${i}" value="${esc(c.n)}" aria-label="اسم القسم"><button class="back" data-act="open" data-i="${i}">فتح</button><button class="back dg" data-act="delcat" data-i="${i}">حذف القسم</button></div>`:`<button class="cat" data-act="open" data-i="${i}"><span class="e">${esc(c.e)}</span>${esc(c.n)}<small>${c.list.length} منتج</small></button>`).join("")+(edit?`<button class="cat" data-act="addcat">＋ قسم جديد</button>`:"")+`</div></section>`}
  else h+=`<section class="wrap"><div class="bar"><button class="back" data-act="home">→ الأقسام</button>${edit?"":`<input class="search" id="q" type="search" placeholder="ابحث داخل القسم…" aria-label="بحث">`}</div><h2>${esc(cur.n)}</h2><div class="grid" id="grid">${edit?editCards():cards()}</div></section>`;
  h+=`<footer><div class="wrap">INSTA PACK<br>${esc(S.address)}<br><a href="${wa("السلام عليكم")}" target="_blank" rel="noopener">واتساب: ${esc(S.show)}</a> · <a class="call" href="tel:${esc(S.show)}" target="_blank" rel="noopener">اتصال: ${esc(S.show)}</a></div></footer><div class="sheet" id="sheet" hidden><div class="box"><b>اتصل بنا</b><p class="num">${esc(S.show)}</p><a class="btn wa" href="tel:${esc(S.show)}" target="_blank" rel="noopener">اتصل الآن</a><button class="btn ln" data-act="copy">نسخ الرقم</button><button class="btn ln" data-act="closesheet">إغلاق</button></div></div>`;
  root.innerHTML=h}
 
-function bar(){document.body.classList.toggle("adm",canEdit);$("adm").innerHTML=!canEdit?"":edit?`<button class="btn wa" data-act="save">حفظ ونشر للعملاء</button><button class="btn ln" data-act="cancel">إلغاء</button><span id="st"></span>`:`<button class="btn wa" data-act="edit">✏️ تعديل الموقع</button>`}
+function bar(){document.body.classList.toggle("adm",canEdit);$("adm").innerHTML=!canEdit?"":edit?`<button class="btn wa" data-act="save">حفظ ونشر للعملاء</button><button class="btn ln" data-act="cancel">إلغاء</button><span id="st"></span>`:`<button class="btn wa" data-act="edit">✏️ تعديل الموقع</button><button class="btn ln" data-act="logout">خروج</button>`}
 const st=t=>{const e=$("st");if(e)e.textContent=t};
 
 function shrink(file,max){return new Promise(res=>{const r=new FileReader;r.onload=()=>{const i=new Image;i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height)),c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);c.getContext("2d").drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.78))};i.src=r.result};r.readAsDataURL(file)})}
 
 const buildDoc=()=>'<!DOCTYPE html><html lang="ar" dir="rtl"><head>'+HEAD+'<style id="css">'+$("css").textContent+'</style></head><body><div id="root"></div><div id="adm"></div><script id="data" type="application/json">'+JSON.stringify(DATA).replace(/</g,"\\u003c")+'<\/script><script id="app">'+$("app").textContent+'<\/script></body></html>';
 
+const GH={o:"instapack-eg",r:"instapack-eg.github.io",p:"index.html",b:"main"};
+const tok=()=>{try{return localStorage.getItem("gh_tok")||""}catch(_){return ""}};
+function b64(s){const b=new TextEncoder().encode(s);let o="";for(let i=0;i<b.length;i+=0x8000)o+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(o)}
 async function save(){const b=document.querySelector('[data-act="save"]');b.disabled=true;
- if(!A){st("الحفظ غير متاح هنا — افتح الصفحة من حسابك على Claude");b.disabled=false;return}
- const doc=buildDoc();if(doc.length>15e6){st("حجم الصور كبير، قلّل عدد الصور");b.disabled=false;return}
+ const doc=buildDoc();
+ if(doc.length>20e6){st("حجم الصور كبير، قلّل عدد الصور");b.disabled=false;return}
  st("جاري الحفظ…");
- try{await A.publish(doc);st("تم الحفظ ✓")}catch(e){st(e&&(e.code==="not_writer"||e.code==="not_granted")?"ما عندكش صلاحية التعديل":e&&e.code==="conflict"?"اتحدّثت نسخة أحدث، جاري التحميل…":"تعذر الحفظ ("+(e&&e.code||"خطأ")+")");b.disabled=false}}
+ const H={Authorization:"Bearer "+tok(),Accept:"application/vnd.github+json"},u=`https://api.github.com/repos/${GH.o}/${GH.r}/contents/${GH.p}`;
+ try{
+  const g=await fetch(u+"?ref="+GH.b,{headers:H});
+  if(g.status===401||g.status===403)throw "auth";
+  const sha=g.ok?(await g.json()).sha:undefined;
+  const r=await fetch(u,{method:"PUT",headers:{...H,"Content-Type":"application/json"},body:JSON.stringify({message:"تحديث الكتالوج",content:b64(doc),branch:GH.b,...(sha?{sha}:{})})});
+  if(r.status===401||r.status===403||r.status===404)throw "auth";
+  if(!r.ok)throw "http"+r.status;
+  st("تم الحفظ ✓ — يظهر للعملاء بعد دقيقة أو اتنين");
+ }catch(e){st(e==="auth"?"المفتاح غير صالح أو منتهي — اضغط خروج وادخل بمفتاح جديد":"تعذر الحفظ ("+(e&&e.message||e)+")")}
+ b.disabled=false}
 
 document.addEventListener("click",e=>{
  const c=e.target.closest("a.call");
@@ -88,6 +101,8 @@ document.addEventListener("click",e=>{
  else if(a==="home")location.hash="";
  else if(a==="edit"){edit=true;bar();render()}
  else if(a==="cancel")location.reload();
+ else if(a==="login"){const v=($("tok").value||"").trim();if(!v)return;try{localStorage.setItem("gh_tok",v)}catch(_){$("lg").textContent="المتصفح منع الحفظ";return}canEdit=true;location.hash="";bar();render()}
+ else if(a==="logout"){try{localStorage.removeItem("gh_tok")}catch(_){}canEdit=false;edit=false;bar();render()}
  else if(a==="save")save();
  else if(a==="addp"){cur.list.push({n:"منتج جديد",d:[],p:null,u:"للقطعة",out:false});render();scrollTo(0,document.body.scrollHeight)}
  else if(a==="del"){cur.list.splice(i,1);render()}
@@ -109,6 +124,5 @@ document.addEventListener("change",async e=>{const t=e.target;if(t.type!=="file"
  const u=await shrink(t.files[0],t.dataset.act==="logo"?256:640);
  if(t.dataset.act==="logo")DATA.logo=u;else cur.list[+t.dataset.i].img=u;render()});
 addEventListener("hashchange",()=>{cur=byHash();render();scrollTo(0,0)});
-render();bar();
-(async()=>{try{if(typeof claude==="undefined")return;const u=await claude.use("user");canEdit=u?await u.canEdit():false;if(canEdit)A=await claude.use("artifact");bar()}catch(_){}})();
+canEdit=!!tok();render();bar();
 </script></body></html>
